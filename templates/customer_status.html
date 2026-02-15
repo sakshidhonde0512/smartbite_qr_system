@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="status-header">
+    <h2>🧾 Your Orders</h2>
+    <span>Table {{ table_no }} · Live Status</span>
+</div>
+
+<div class="orders-container" id="orders"></div>
+
+<div class="status-footer">
+    Updates automatically · Please wait while your order is prepared ☕
+</div>
+
+<script>
+const tableNo = "{{ table_no }}";
+
+function getProgress(status) {
+    switch (status.toLowerCase()) {
+        case "ordered": return 25;
+        case "preparing": return 55;
+        case "ready": return 85;
+        case "served": return 100;
+        default: return 0;
+    }
+}
+
+function loadOrders() {
+    fetch(`/api/customer_status?table=${tableNo}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = "";
+
+            if (data.length === 0) {
+                html = `
+                    <div class="order-card">
+                        <h3>No active orders</h3>
+                        <div class="order-info">Please place an order to see live status.</div>
+                    </div>
+                `;
+            }
+
+            data.forEach(order => {
+                const progress = getProgress(order.status);
+
+                html += `
+                    <div class="order-card">
+                        <h3>${order.item_name}</h3>
+                        <div class="order-info">
+                            Quantity: ${order.quantity}<br>
+                            <span class="price">₹${order.price}</span>
+                        </div>
+                        <span class="status ${order.status.toLowerCase()}">
+                            ${order.status}
+                        </span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width:${progress}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById("orders").innerHTML = html;
+        });
+}
+
+loadOrders();
+setInterval(loadOrders, 3000);
+</script>
+
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="header">🛒 Your Cart</div>
+
+<div id="cart-items" class="cart-container"></div>
+
+<div class="bottom-bar">
+  <div class="bill-row">
+    <span>Subtotal</span>
+    <span id="subtotal">₹0</span>
+  </div>
+
+  <div class="bill-row">
+    <span>GST (5%)</span>
+    <span id="gst">₹0</span>
+  </div>
+
+  <div class="bill-row bill-total">
+    <span>Total</span>
+    <span id="total-price">₹0</span>
+  </div>
+
+  <button id="placeOrderBtn" type="button" class="place-order-btn">
+  Place Order
+</button>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+const cartItemsDiv = document.getElementById("cart-items");
+const subtotalSpan = document.getElementById("subtotal");
+const gstSpan = document.getElementById("gst");
+const totalPriceSpan = document.getElementById("total-price");
+
+function renderCart() {
+  cartItemsDiv.innerHTML = "";
+
+  if (cart.length === 0) {
+    cartItemsDiv.innerHTML = `
+      <div class="empty">
+        <h3>Your cart is empty 😕</h3>
+        <h2>Our kitchen isn't😋</h2>
+        <h4>Add items from menu🤤</h4>
+      </div>
+    `;
+    totalItemsSpan.textContent = "0 Items";
+    totalPriceSpan.textContent = "₹0";
+    return;
+  }
+
+
+  let subtotal = 0;
+
+  cart.forEach((item, index) => {
+    subtotal += item.price * item.qty;
+
+    const div = document.createElement("div");
+    div.className = "cart-item";
+
+    div.innerHTML = `
+      <div class="item-info">
+        <span class="item-name">
+  ${item.name}
+  ${item.addons ? `<br><small style="color:#aaa">+ ${item.addons.join(", ")}</small>` : ""}
+</span>
+        <span class="item-price">₹${item.price}</span>
+      </div>
+
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="updateQty(${index}, -1)">−</button>
+        <span class="qty-number">${item.qty}</span>
+        <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+        <button class="remove-btn" onclick="removeItem(${index})">❌</button>
+      </div>
+    `;
+
+    cartItemsDiv.appendChild(div);
+  });
+
+  const gst = Math.round(subtotal * 0.05);
+  const total = subtotal + gst;
+
+  subtotalSpan.innerText = `₹${subtotal}`;
+  gstSpan.innerText = `₹${gst}`;
+  totalPriceSpan.innerText = `₹${total}`;
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateQty(index, change) {
+  cart[index].qty += change;
+
+  if (cart[index].qty <= 0) {
+    cart.splice(index, 1);
+  }
+
+  if (cart.length === 0) {
+  subtotalSpan.innerText = "₹0";
+  gstSpan.innerText = "₹0";
+  totalPriceSpan.innerText = "₹0";
+}
+
+  renderCart();
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+renderCart();
+</script>
+<script src="/static/js/cart.js"></script>
+
+{% endblock %}

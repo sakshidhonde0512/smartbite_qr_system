@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="admin-title">📊 SmartBite Admin Dashboard</h2>
+
+<!-- ===== TOP STATS ===== -->
+<div class="grid">
+<div class="card"><h4>Total Orders</h4><p id="totalOrders">0</p></div>
+<div class="card"><h4>Total Revenue</h4><p id="totalRevenue">₹0</p></div>
+<div class="card"><h4>Today Revenue</h4><p id="todayRevenue">₹0</p></div>
+<div class="card"><h4>Month Revenue</h4><p id="monthRevenue">₹0</p></div>
+</div>
+
+<!-- ===== STATUS + DOUGHNUT ===== -->
+<div class="status-doughnut-wrapper">
+    <div class="status-cards">
+        <div class="card"><h4>Active Orders</h4><p id="active">0</p></div>
+        <div class="card"><h4>Preparing</h4><p id="preparing">0</p></div>
+        <div class="card"><h4>Ready</h4><p id="ready">0</p></div>
+        <div class="card"><h4>Served</h4><p id="served">0</p></div>
+    </div>
+
+    <div class="status-doughnut">
+        <h4>📊 Order Status Overview</h4>
+        <canvas id="statusChartCanvas"></canvas>
+    </div>
+</div>
+
+<!-- ===== TODAY VS YESTERDAY ===== -->
+<div class="chart-wrap">
+<h4>📈 Today vs Yesterday Revenue</h4>
+<canvas id="revenueChart"></canvas>
+</div>
+
+<!-- ===== HOURLY SALES ===== -->
+<div class="chart-wrap">
+<h4>⏱ Hourly Sales (Today)</h4>
+<canvas id="hourlyChart"></canvas>
+</div>
+
+<!-- ===== TOP ITEMS ===== -->
+<div class="chart-wrap">
+<h4>🔥 Top Selling Items</h4>
+<canvas id="topItemsChart"></canvas>
+</div>
+
+<button id="exportBtn">Export CSV</button>
+
+<audio id="newOrderSound" src="/static/sounds/notification.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let statusChart, revenueChart, hourlyChart, topItemsChart;
+let lastOrderCount = 0;
+
+function loadData(){
+    fetch("/api/admin_stats")
+.then(res => res.json())
+.then(data => {
+    console.log("TOP ITEMS:", data.top_items);
+    document.getElementById("totalOrders").innerText = data.total_orders;
+    document.getElementById("totalRevenue").innerText = "₹" + data.total_revenue;
+    document.getElementById("todayRevenue").innerText = "₹" + data.today_revenue;
+    document.getElementById("monthRevenue").innerText = "₹" + data.month_revenue;
+
+        let active = 0, preparing = 0, ready = 0, served = 0;
+
+if (Array.isArray(data.status_data)) {
+    data.status_data.forEach(s => {
+        const name = String(s[0]).toLowerCase().trim();
+        const count = Number(s[1]) || 0;
+
+        if (name === "ordered") active += count;
+        else if (name === "preparing") preparing += count;
+        else if (name === "ready") ready += count;
+        else if (name === "served") served += count;
+    });
+}
+
+        document.getElementById("active").innerText=active;
+        document.getElementById("preparing").innerText=preparing;
+        document.getElementById("ready").innerText=ready;
+        document.getElementById("served").innerText=served;
+
+        if(data.total_orders > lastOrderCount){
+            document.getElementById("newOrderSound").play();
+        }
+        lastOrderCount = data.total_orders;
+
+        if(statusChart) statusChart.destroy();
+        statusChart = new Chart(document.getElementById("statusChartCanvas"),{
+            type:"doughnut",
+            data:{
+                labels:data.status_data.map(x=>x[0]),
+                datasets:[{
+                    data:data.status_data.map(x=>x[1]),
+                    backgroundColor:[ '#f87171','#fbbf24','#34d399','#60a5fa',
+ '#a78bfa','#f472b6','#38bdf8'
+],
+                    borderWidth:2
+                }]
+            },
+            options:{ responsive:true }
+        });
+
+        // ---- TODAY VS YESTERDAY ----
+if(revenueChart) revenueChart.destroy();
+
+revenueChart = new Chart(document.getElementById("revenueChart"),{
+    type:"bar",
+    data:{
+        labels:["Yesterday","Today"],
+        datasets:[{
+            label:"Revenue",
+            data:[
+                data.yesterday_revenue || 0,
+                data.today_revenue || 0
+            ],
+            backgroundColor:["#6f4e37","#fbbf24"]
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+        // ---- HOURLY SALES ----
+if(hourlyChart) hourlyChart.destroy();
+
+let replaceLabels = data.hour_labels || [];
+let replaceValues = data.hour_values || [];
+
+hourlyChart = new Chart(document.getElementById("hourlyChart"),{
+    type:"line",
+    data:{
+        labels: replaceLabels,
+        datasets:[{
+            label:"Sales",
+            data: replaceValues,
+            fill:true,
+            backgroundColor:"rgba(111,78,55,0.2)",
+            borderColor:"#6f4e37",
+            tension:0.3
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+        if(topItemsChart) topItemsChart.destroy();
+
+topItemsChart = new Chart(document.getElementById("topItemsChart"), {
+    type: "bar",
+    data: {
+        labels: data.top_items.map(x => x[0]),
+        datasets: [{
+            label: "Quantity Sold",
+            data: data.top_items.map(x => x[1]),
+            backgroundColor: "#34d399"
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+    });
+}
+
+document.getElementById("exportBtn").addEventListener("click",()=>{
+    fetch("/api/admin_export_csv")
+    .then(res=>res.blob())
+    .then(blob=>{
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "cafe_report.csv";
+        a.click();
+    });
+});
+
+loadData();
+setInterval(loadData,3000);
+</script>
+<a href="/admin/paid_bills">
+    <button>View Paid Bills</button>
+</a>
+<script>
+document.getElementById("totalOrders").innerText = "{{ total_orders }}";
+document.getElementById("totalRevenue").innerText = "₹{{ total_revenue }}";
+document.getElementById("todayRevenue").innerText = "₹{{ today_revenue }}";
+document.getElementById("monthRevenue").innerText = "₹{{ monthly_revenue }}";
+</script>
+
+{% endblock %}

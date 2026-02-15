@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding-bottom: 140px;
+  background: radial-gradient(circle at top, #2b1b14, #0f0a08);
+  color: #f9f5f2;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ================= HEADER ================= */
+.header {
+  background: linear-gradient(135deg, #3a1f0f, #8b4513);
+  color: #fef3c7;
+  padding: 20px;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* ================= CART AREA ================= */
+.cart-container {
+  padding: 20px;
+}
+
+/* ================= CART CARD ================= */
+.cart-item {
+  background: linear-gradient(145deg, #1b0f0a, #2d1a12);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 196, 137, 0.25);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ================= ITEM INFO ================= */
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fde68a;
+}
+
+.item-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fb923c;
+}
+
+/* ================= QUANTITY ================= */
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.qty-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: #1a0c05;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(249,115,22,0.5);
+  transition: transform 0.2s ease;
+}
+
+.qty-btn:hover {
+  transform: scale(1.1);
+}
+
+.qty-number {
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ================= REMOVE ================= */
+.remove-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #f87171;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.remove-btn:hover {
+  transform: rotate(10deg) scale(1.2);
+}
+
+/* ================= EMPTY ================= */
+.empty {
+  text-align: center;
+  margin-top: 90px;
+  color: #d6d3d1;
+  font-size: 16px;
+  font-family: 'Playfair Display', serif;
+}
+
+/* ================= BOTTOM BAR ================= */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(180deg, #1b0f0a, #120906);
+  padding: 18px;
+  border-top: 1px solid rgba(251,146,60,0.4);
+  box-shadow: 0 -15px 40px rgba(0,0,0,0.8);
+}
+
+/* ================= BILL ================= */
+.summary {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: #fde68a;
+}
+
+.bill-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #e7e5e4;
+}
+
+.bill-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fb923c;
+}
+
+/* ================= PLACE ORDER ================= */
+.place-order-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #1a0c05;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(249,115,22,0.6);
+  transition: transform 0.25s ease;
+}
+
+.place-order-btn:hover {
+  transform: translateY(-3px);
+}
+

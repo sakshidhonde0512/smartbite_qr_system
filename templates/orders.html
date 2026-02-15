@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="kitchen-page">
+
+<h2 class="kitchen-header">🔥 Live Orders – Kitchen</h2>
+
+<div class="kitchen-tables">
+
+{% set grouped = {} %}
+{% for order in orders %}
+    {% if order[5]|lower not in ['served', 'paid'] %}
+        {% if order[1] not in grouped %}
+            {% set _ = grouped.update({order[1]: []}) %}
+        {% endif %}
+        {% set _ = grouped[order[1]].append(order) %}
+    {% endif %}
+{% endfor %}
+
+{% for table, items in grouped.items() %}
+<div class="kitchen-table-card" id="table-{{ table }}" data-table="{{ table }}">
+
+    <div class="kitchen-table-title">🍽 Table {{ table }}</div>
+    <div class="kitchen-timer"></div>
+
+    {% for order in items %}
+    <div class="kitchen-item" id="order-{{ order[0] }}">
+
+        {{ order[2] }} × {{ order[3] }} — ₹{{ order[4] }}
+
+        <div>
+            <span class="kitchen-badge kitchen-{{ order[5]|lower }}">
+                {{ order[5] }}
+            </span>
+
+            <form class="status-form" data-order-id="{{ order[0] }}">
+                <select name="status" class="kitchen-select">
+                    <option value="Ordered">Ordered</option>
+                    <option value="Preparing">Preparing</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Served">Served</option>
+                </select>
+
+                <button type="submit" class="kitchen-btn">✓</button>
+            </form>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+{% endfor %}
+
+</div>
+</div>
+
+<!-- AUTO REFRESH -->
+<script>
+let autoRefresh = true;
+setInterval(()=>{
+    if(autoRefresh) location.reload();
+},8000);
+
+document.querySelectorAll(".status-form").forEach(f=>{
+    f.addEventListener("submit",()=>autoRefresh=false);
+});
+</script>
+
+<!-- TIMER -->
+<script>
+document.querySelectorAll('.kitchen-table-card').forEach(card=>{
+    const table = card.dataset.table;
+    const key = "timer_"+table;
+
+    let start = localStorage.getItem(key);
+    if(!start){
+        start = Date.now();
+        localStorage.setItem(key,start);
+    }
+
+    const timer = card.querySelector(".kitchen-timer");
+
+    setInterval(()=>{
+        const sec = Math.floor((Date.now()-start)/1000);
+        const m = Math.floor(sec/60);
+        const s = sec%60;
+        timer.innerText = `⏱ ${m}m ${s}s`;
+    },1000);
+});
+</script>
+
+<!-- STATUS UPDATE -->
+<script>
+document.querySelectorAll(".status-form").forEach(form=>{
+    form.addEventListener("submit",function(e){
+        e.preventDefault();
+
+        let orderId=this.dataset.orderId;
+        let status=this.querySelector("select").value;
+
+        fetch("/update-status",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:`order_id=${orderId}&status=${status}`
+        }).then(()=>location.reload());
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+<!-- HEADER -->
+<div class="menu-header">☕ Café Menu</div>
+
+<!-- SEARCH -->
+<div class="search-wrapper">
+  <input type="text" id="menuSearch" placeholder="🔍 Search coffee, snacks..." />
+</div>
+
+<div class="mood-bar">
+
+  <h4>Select your mood:</h4>
+
+  <button onclick="selectMood('happy')">😊 Happy</button>
+  <button onclick="selectMood('tired')">😴 Tired</button>
+  <button onclick="selectMood('hungry')">🍔 Hungry</button>
+  <button onclick="selectMood('light')">🥗 Light</button>
+  <button onclick="selectMood(null)">🔄 Show All</button>
+
+  <!-- Dietary Section -->
+  <div class="allergy-bar">
+    <h4>Dietary Preferences:</h4>
+    <label>
+      <input type="checkbox" id="filter_veg"> 🌱 Veg Only
+    </label>
+
+    <label>
+      <input type="checkbox" id="filter_no_dairy"> 🥛 No Dairy
+    </label>
+
+    <label>
+      <input type="checkbox" id="filter_no_nuts"> 🥜 No Nuts
+    </label>
+  </div>
+
+</div>
+
+
+<!-- RECOMMENDATION SECTION (ABOVE MENU) -->
+<div id="recommendation-section" class="recommendation hidden">
+  <h2>✨ Recommended for You</h2>
+  <div id="recommended-items" class="ai-grid"></div>
+</div>
+
+<!-- CATEGORY BAR -->
+<div id="category-bar" class="category-bar"></div>
+
+<!-- MENU -->
+<div id="menu-container"></div>
+
+<!-- CART BAR -->
+<div id="cart-bar" class="cart-bar hidden">
+  <div class="cart-info">
+    <span id="cart-count">0 Items</span>
+    <span id="cart-total">₹0</span>
+  </div>
+  <button class="view-cart-btn" onclick="goToCart()">View Cart →</button>
+</div>
+
+<script>
+/* ================= TABLE NO ================= */
+const TABLE_NO = "{{ table_no }}";
+
+// if (!TABLE_NO) {
+//   alert("Table number missing. Please scan QR again.");
+// } else {
+//   localStorage.setItem("table_no", TABLE_NO);
+// }
+
+/* ================= CART ================= */
+let cart = [];
+let currentMood = null;
+
+function addToCart(item) {
+
+  const existing = cart.find(i =>
+    i.id === item.id &&
+    JSON.stringify(i.addons) === JSON.stringify(item.addons)
+  );
+
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push(item);
+  }
+
+  updateCartBar();
+}
+
+function updateCartBar() {
+  let qty = 0, total = 0;
+  cart.forEach(i => {
+    qty += i.qty;
+    total += i.qty * i.price;
+  });
+
+  const bar = document.getElementById("cart-bar");
+  if (qty === 0) bar.classList.add("hidden");
+  else {
+    bar.classList.remove("hidden");
+    document.getElementById("cart-count").textContent = `${qty} Items`;
+    document.getElementById("cart-total").textContent = `₹${total}`;
+  }
+}
+
+function goToCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  window.location.href = "/cart";
+}
+</script>
+<script>
+let selectedItemForAddon = null;
+let afterAddonCallback = null;
+
+function openAddonModal(item, callback) {
+  selectedItemForAddon = item;
+  afterAddonCallback = callback;
+
+  // ✅ USE ADDONS FROM MENU API
+  const addons = item.addons;
+
+  if (!addons || addons.length === 0) {
+    callback(); // no addons → normal flow
+    return;
+  }
+
+  const list = document.getElementById("addon-list");
+  list.innerHTML = "";
+
+  addons.forEach(a => {
+    list.innerHTML += `
+      <label>
+        <input type="checkbox" data-price="${a.price}">
+        ${a.name} (+₹${a.price})
+      </label><br>
+    `;
+  });
+
+  document.getElementById("addon-modal").classList.remove("hidden");
+}
+function confirmAddons() {
+
+  let addonPrice = 0;
+  let addonNames = [];
+
+  document
+    .querySelectorAll("#addon-list input:checked")
+    .forEach(cb => {
+      addonPrice += Number(cb.dataset.price);
+      addonNames.push(cb.parentNode.textContent.trim());
+    });
+
+  const itemWithAddons = {
+    id: selectedItemForAddon.id,
+    name: selectedItemForAddon.name,
+    price: selectedItemForAddon.price + addonPrice,
+    qty: 1,
+    addons: addonNames   // ⭐⭐ VERY IMPORTANT ⭐⭐
+  };
+
+  addToCart(itemWithAddons);
+
+  closeAddonModal();
+}
+function closeAddonModal() {
+  document.getElementById("addon-modal").classList.add("hidden");
+}
+</script>
+<script>
+
+fetch("/api/menu")
+  .then(res => res.json())
+  .then(data => {
+
+    const categoryBar = document.getElementById("category-bar");
+    const menuContainer = document.getElementById("menu-container");
+
+    Object.values(data).forEach(category => {
+
+      const btn = document.createElement("button");
+      btn.className = "category-btn";
+      btn.textContent = category.name;
+      btn.onclick = () =>
+        document.getElementById(`cat-${category.id}`)
+          .scrollIntoView({ behavior: "smooth" });
+      categoryBar.appendChild(btn);
+
+      const section = document.createElement("div");
+      section.className = "category-section";
+      section.id = `cat-${category.id}`;
+
+      const title = document.createElement("h2");
+      title.textContent = category.name;
+      section.appendChild(title);
+
+      Object.values(category.sub_categories).forEach(sub => {
+
+        const subTitle = document.createElement("h3");
+        subTitle.className = "subcategory-title";
+        subTitle.textContent = sub.name;
+        section.appendChild(subTitle);
+
+        const items = document.createElement("div");
+        items.className = "items-grid";
+
+        sub.items.forEach(item => {
+
+          const card = document.createElement("div");
+          card.className = "item-card";
+          card.setAttribute("data-id", item.id);
+
+          card.innerHTML = `
+           <div class="item-top">
+  <img 
+    src="/static/images/menu/${item.name.toLowerCase().replaceAll(' ', '_')}.jpg"
+    class="menu-item-img"
+    onerror="this.src='/static/images/menu/default.jpg'">
+
+  <span class="item-name">${item.name}</span>
+  <span class="item-price">₹${item.price}</span>
+</div>
+
+            <div class="food-icons">
+              ${Number(item.is_veg) === 1 ? '<span class="icon veg">🟢 Veg</span>' : '<span class="icon nonveg">🔴 Non-Veg</span>'}
+              ${Number(item.contains_dairy) === 1 ? '<span class="icon">🥛 Dairy</span>' : ''}
+              ${Number(item.contains_nuts) === 1 ? '<span class="icon">🥜 Nuts</span>' : ''}
+              ${Number(item.is_gluten_free) === 1 ? '<span class="icon">🌾 Gluten-Free</span>' : ''}
+            </div>
+
+            <div class="item-desc">Freshly prepared</div>
+
+            <div class="qty-wrapper">
+              <button class="add-btn">ADD</button>
+            </div>
+          `;
+
+          const qtyWrapper = card.querySelector(".qty-wrapper");
+
+function renderQty(qty) {
+  if (qty <= 0) {
+    qtyWrapper.innerHTML = `<button class="add-btn">ADD</button>`;
+    qtyWrapper.querySelector(".add-btn").onclick = () => {
+      openAddonModal(item, () => updateQty(1));
+    };
+    return;
+  }
+
+  qtyWrapper.innerHTML = `
+    <button class="qty-btn minus">−</button>
+    <span class="qty">${qty}</span>
+    <button class="qty-btn plus">+</button>
+  `;
+
+  qtyWrapper.querySelector(".plus").onclick = () => {
+    updateQty(qty + 1);
+  };
+
+  qtyWrapper.querySelector(".minus").onclick = () => {
+    updateQty(qty - 1);
+  };
+}
+
+function updateQty(newQty) {
+  let cartItem = cart.find(i => i.id === item.id);
+
+  if (!cartItem && newQty > 0) {
+  cart.push({
+    id: item.id,
+    name: item.name,
+    price: item.price + (item._addonPrice || 0),
+    qty: newQty
+  });
+} else if (cartItem) {
+    cartItem.qty = newQty;
+    if (cartItem.qty <= 0) {
+      cart = cart.filter(i => i.id !== item.id);
+    }
+  }
+
+  updateCartBar();
+  renderQty(newQty);
+}
+
+/* INITIAL STATE */
+renderQty(0);
+          items.appendChild(card);
+        });
+
+        section.appendChild(items);
+      });
+
+      menuContainer.appendChild(section);
+    });
+  });
+</script>
+
+<script>
+/* SEARCH */
+document.getElementById("menuSearch").addEventListener("input", function() {
+  const value = this.value.toLowerCase();
+  document.querySelectorAll(".item-card").forEach(card => {
+    card.style.display =
+      card.innerText.toLowerCase().includes(value) ? "flex" : "none";
+  });
+});
+
+/* MOOD → RECOMMENDATION (NO HIDING MENU) */
+
+/* ================= AI RECOMMENDATION ================= */
+
+function selectMood(mood) {
+  currentMood = mood;
+  loadAIRecommendations();
+}
+
+function loadAIRecommendations() {
+
+  if (!TABLE_NO) {
+    alert("Table number missing.");
+    return;
+  }
+
+  const section = document.getElementById("recommendation-section");
+  const box = document.getElementById("recommended-items");
+
+  box.innerHTML = "Loading AI suggestions...";
+  section.classList.remove("hidden");
+
+  let url = `/api/ai_recommend/${TABLE_NO}?`;
+
+if (currentMood) {
+  url += `mood=${currentMood}&`;
+}
+
+const vegOnly = document.getElementById("filter_veg")?.checked||false;
+const noDairy = document.getElementById("filter_no_dairy")?.checked||false;
+const noNuts = document.getElementById("filter_no_nuts")?.checked||false;
+
+url += `veg_only=${vegOnly}&`;
+url += `no_dairy=${noDairy}&`;
+url += `no_nuts=${noNuts}&`;
+
+console.log("AI URL:",url);
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+
+      box.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        box.innerHTML = "<p>No recommendations available.</p>";
+        return;
+      }
+
+      data.forEach(item => {
+
+        const aiCard = document.createElement("div");
+        aiCard.className = "ai-card";
+
+        aiCard.innerHTML = `
+          <div class="ai-title">${item.name}</div>
+          <div class="ai-sub">Recommended based on ${currentMood || "your preferences"}</div>
+          <div class="ai-bottom">
+            <span class="ai-price">₹${item.price}</span>
+            <button class="ai-add">ADD</button>
+          </div>
+        `;
+
+        const bottom = aiCard.querySelector(".ai-bottom");
+
+function renderAIQty(qty) {
+  if (qty <= 0) {
+    bottom.innerHTML = `
+      <span class="ai-price">₹${item.price}</span>
+      <button class="ai-add">ADD</button>
+    `;
+
+    bottom.querySelector(".ai-add").onclick = () => {
+      openAddonModal(item, () => updateAIQty(1));
+    };
+
+    return;
+  }
+
+  bottom.innerHTML = `
+    <span class="ai-price">₹${item.price}</span>
+    <div class="ai-qty">
+      <button class="qty-btn minus">−</button>
+      <span class="qty">${qty}</span>
+      <button class="qty-btn plus">+</button>
+    </div>
+  `;
+
+  bottom.querySelector(".plus").onclick = () => {
+    updateAIQty(qty + 1);
+  };
+
+  bottom.querySelector(".minus").onclick = () => {
+    updateAIQty(qty - 1);
+  };
+}
+
+function updateAIQty(newQty) {
+  let cartItem = cart.find(i => i.id === item.id);
+
+  if (!cartItem && newQty > 0) {
+    cart.push({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      qty: newQty,
+      addons: []
+    });
+  } else if (cartItem) {
+    cartItem.qty = newQty;
+    if (cartItem.qty <= 0) {
+      cart = cart.filter(i => i.id !== item.id);
+    }
+  }
+
+  updateCartBar();
+  renderAIQty(newQty);
+}
+
+renderAIQty(0);
+
+        box.appendChild(aiCard);
+      });
+
+    })
+    .catch(err => {
+      console.error("AI Error:", err);
+      box.innerHTML = "<p>AI system error.</p>";
+    });
+}
+
+
+
+document.querySelectorAll(".allergy-bar input")
+  .forEach(cb => {
+    cb.addEventListener("change", () => {
+      loadAIRecommendations();
+    });
+  });
+
+window.onload = function() {
+  if (TABLE_NO) {
+    loadAIRecommendations();
+  }
+};
+
+
+
+</script>
+
+<!-- ADDON MODAL -->
+<div id="addon-modal" class="addon-modal hidden">
+  <div class="addon-box">
+    <h3>Select Add-ons</h3>
+    <div id="addon-list"></div>
+    <button onclick="confirmAddons()">Add to Cart</button>
+    <button onclick="closeAddonModal()">Cancel</button>
+  </div>
+</div>
+
+</div>
+{% endblock %}

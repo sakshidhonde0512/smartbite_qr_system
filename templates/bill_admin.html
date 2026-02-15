@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Bill - Table {{ table_no }}</title>
+
+    <style>
+        /* ===============================
+           ☕ COLORS AND FONTS LIKE CUSTOMER STATUS EXAMPLE
+           =============================== */
+        body {
+            margin: 0;
+            font-family: 'Poppins', system-ui, sans-serif;
+            background: #efe7df;
+            color: #3b2b24;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        h2 { text-align:center; font-size:22px; font-weight:600; color:#5a3f2c; margin-bottom:20px; }
+
+        .bill-container {
+            max-width:900px;
+            margin:auto;
+            background:#d9c9bd;
+            border-radius:18px;
+            padding:24px;
+            border:1px solid #c7b6aa;
+            box-shadow:0 6px 14px rgba(0,0,0,.08);
+        }
+
+        table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:16px;
+        }
+
+        th { text-align:left; font-size:13px; text-transform:uppercase; color:#5a3f2c; padding:12px 10px; border-bottom:1px solid #c7b6aa;}
+        td { padding:14px 10px; border-bottom:1px solid #c7b6aa; font-size:14px;}
+        td:nth-child(3), td:nth-child(4) { font-weight:600; color:#3b2b24; }
+
+        .status { font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; display:inline-block; color:white;}
+        .Ordered { background: #b45309; }
+        .Preparing { background: #ea580c; }
+        .Ready { background: #2f855a; }
+        .Served { background: #6b7280; }
+        .Paid { background: #2f855a; }
+
+        .total-box { margin-top:24px; display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px dashed #c7b6aa;}
+        .total-label { font-size:15px; color:#5a3f2c; }
+        .total-amount { font-size:22px; font-weight:700; color:#2f855a; }
+
+        .print-btn { margin-top:26px; padding:12px 28px; font-size:14px; font-weight:600; border:none; border-radius:999px; cursor:pointer; background:#6f4e37; color:white; }
+    </style>
+</head>
+
+<body>
+<h2>🧾 Admin Bill — Table {{ table_no }}</h2>
+
+<div class="bill-container">
+<table>
+    <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+        <th>Status</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{ order[0] }}</td>
+        <td>{{ order[1] }}</td>
+        <td>₹{{ order[2] }}</td>
+        <td>₹{{ order[1]*order[2] }}</td>
+        <td class="status {{ order[3] }}">{{ order[3] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div class="total-box">
+    <div class="total-label">Total Amount</div>
+    <div class="total-amount">₹{{ total }}</div>
+</div>
+
+<div style="text-align:center;">
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Download PDF</button>
+</div>
+</div>
+</body>
+</html>

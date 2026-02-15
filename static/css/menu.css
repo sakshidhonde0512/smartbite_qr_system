@@ -1,0 +1,871 @@
+.menu-page * {
+  box-sizing: border-box;
+  /* margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif; */
+}
+
+body {
+  background: #f6f7f9;
+  color: #222;
+  
+}
+
+/* Header */
+.menu-header {
+  background: #b03e3e;
+  padding: 16px;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #ddd;
+  
+}
+
+/* Category Bar */
+.category-bar {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  overflow-x: auto;
+  background: #fff;
+  position: sticky;
+  top: 56px;
+  z-index: 90;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  background: #222;
+  color: #fff;
+}
+
+/* Category Section */
+.category-section {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px 16px;
+}
+
+.category-section h2 {
+  font-size: 24px;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 10px;
+}
+
+/* Subcategory */
+.subcategory-title {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Playfair Display', serif;
+  margin: 20px 0 10px;
+  color: #444;
+}
+
+/* Items Grid */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+/* Item Card */
+.item-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Item Top */
+.item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.item-price {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Description */
+.item-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 6px 0;
+}
+
+/* Add Button */
+.add-btn {
+  align-self: flex-end;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid #1bb978;
+  background: #e9fbf3;
+  color: #1bb978;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #1bb978;
+  color: #fff;
+}
+
+.item-veg {
+  margin: 6px 0;
+}
+
+.veg-dot,
+.non-veg-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.veg-dot {
+  background: green;
+}
+
+.non-veg-dot {
+  background: red;
+}
+
+.qty-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #1bb978;
+  background: #e9fbf3;
+  color: #1bb978;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.qty {
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+}
+
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1bb978;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  font-weight: 700;
+  z-index: 999;
+}
+
+.cart-bar.hidden {
+  display: none;
+}
+
+.cart-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-cart-btn {
+  background: white;
+  color: #1bb978;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cart-page {
+  max-width: 800px;
+  margin: auto;
+  padding: 16px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.cart-summary {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #1bb978;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 20px;
+  font-weight: 700;
+}
+
+/* ===============================
+   🌟 PREMIUM THEME UPGRADE
+   (visual only – no layout change)
+   Paste at END of file
+================================ */
+
+/* Google font – modern + premium */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Color variables (easy future editing) */
+:root {
+  --primary: #16a34a;         /* rich green */
+  --primary-dark: #12803a;
+  --accent: #ffb703;         /* warm highlight */
+  --bg: #f3f5f7;
+  --card-bg: #ffffff;
+  --text-main: #1a1a1a;
+  --text-soft: #6b7280;
+}
+
+/* Global font + background */
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(180deg, #f9fafb, #eef2f7);
+  color: var(--text-main);
+}
+
+/* ===== HEADER ===== */
+.menu-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+/* ===== CATEGORY BAR ===== */
+.category-bar {
+  background: #ffffffee;
+  backdrop-filter: blur(8px);
+}
+
+/* Category buttons */
+.category-btn {
+  background: #f1f3f5;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Active category */
+.category-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(22,163,74,0.3);
+}
+
+/* ===== CATEGORY TITLES ===== */
+.category-section h2 {
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 0.3px;
+}
+
+.subcategory-title {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* ===== ITEM CARDS ===== */
+.item-card {
+  background: var(--card-bg);
+  border: 1px solid #eef1f4;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: all 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.item-card:hover {
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+/* Item name */
+.item-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  display: box;
+  line-clamp: 2;
+
+  overflow: hidden;
+}
+
+/* Price highlight */
+.item-price {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 2px;
+}
+
+/* Description */
+.item-desc {
+  color: var(--text-soft);
+}
+
+
+/* ===== ADD BUTTON ===== */
+.add-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(22,163,74,0.25);
+}
+
+.add-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* ===== QTY BUTTONS ===== */
+.qty-btn {
+  background: #e8f7ef;
+  color: var(--primary-dark);
+  border: none;
+  font-weight: 700;
+}
+
+.qty-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== VEG/NON-VEG dots (brighter) ===== */
+.veg-dot {
+  background: #16a34a;
+}
+
+.non-veg-dot {
+  background: #dc2626;
+}
+
+/* ===== CART BAR ===== */
+.cart-bar,
+.cart-summary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 -4px 14px rgba(0,0,0,0.18);
+}
+
+/* View cart button */
+.view-cart-btn {
+  background: white;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.view-cart-btn:hover {
+  background: #f0fdf4;
+}
+
+/* ===== Scrollbar (premium touch) ===== */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+/* ===============================
+   🟤 CAFE BROWN PREMIUM THEME
+   (color override only)
+================================ */
+
+:root {
+  --primary: #6f4e37;        /* coffee brown */
+  --primary-dark: #4b2e2b;   /* dark mocha */
+  --accent: #c8a27a;         /* latte gold */
+  --bg: #f6f3ef;             /* warm background */
+  --card-bg: #ffffff;
+  --text-main: #2d2d2d;
+  --text-soft: #7a7a7a;
+}
+
+/* Warm café background */
+body {
+  background: linear-gradient(180deg, #faf8f5, #f1ece6);
+}
+
+/* Price highlight */
+.item-price {
+  color: var(--primary);
+}
+
+/* Buttons use coffee tone */
+.add-btn {
+  background: var(--primary);
+}
+
+.add-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* Qty buttons */
+.qty-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* Cart + header gradient */
+.menu-header,
+.cart-bar,
+.cart-summary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+/* Active category */
+.category-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Subtle café shadow (softer & premium) */
+.item-card {
+  box-shadow: 0 6px 18px rgba(111, 78, 55, 0.15);
+  overflow: hidden;
+}
+
+/* ===============================
+   🖼 Item Image Style
+================================ */
+
+.item-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease;
+}
+
+.item-card:hover .item-img {
+  transform: scale(1.04);
+}
+.item-top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ===============================
+   🔍 Floating Search Bar
+================================ */
+
+.search-wrapper {
+  position: sticky;
+  top: 56px;
+  z-index: 95;
+  background: transparent;
+  padding: 10px 14px;
+}
+
+#menuSearch {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: white;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  font-family: "Poppins", sans-serif;
+}
+
+/* ===============================
+   🏷 Premium Badges
+================================ */
+
+.badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-block;
+  margin-left: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* Coffee brown */
+.badge-primary {
+  background: #f1e7df;
+  color: #6f4e37;
+}
+
+/* Gold premium */
+.badge-gold {
+  background: linear-gradient(135deg, #d4af37, #b8902c);
+  color: white;
+}
+
+/* Red warning */
+.badge-danger {
+  background: #fde8e8;
+  color: #c62828;
+}
+
+/* New item */
+.badge-new {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.category-bar {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  overflow-x: auto;
+
+  background: #fff;
+
+  position: sticky;
+  top: 116px;   /* 56(header) + 60(search) */
+
+  z-index: 90;
+}
+
+/* ================= AI + MOOD UI ================= */
+
+.mood-bar {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  justify-content: center;
+  background: #111;
+  color: white;
+}
+
+.mood-bar button {
+  background: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.mood-bar button:hover {
+  background: #6f4e37;
+}
+
+.ai-section {
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.ai-section h2 {
+  margin-bottom: 10px;
+  font-family: 'Playfair Display', serif;
+}
+
+.ai-card {
+  border: 2px solid #6f4e37;
+  box-shadow: 0 6px 18px rgba(111,78,55,0.3);
+}
+
+
+
+
+.ai-section {
+  padding: 15px;
+  background: #fff7e6;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+/* ===============================
+   🤖 AI RECOMMENDATION CARDS
+================================ */
+
+.recommendation {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 10px 16px;
+}
+
+.recommendation h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+/* Grid */
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.ai-card {
+  background: #f8f8f8;
+  border: 2px solid #d6c1a5;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 6px 14px rgba(111,78,55,0.15);
+}
+
+/* Title */
+.ai-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* Subtitle */
+.ai-sub {
+  font-size: 12px;
+  color: #777;
+  margin: 6px 0 12px;
+}
+
+/* Bottom row */
+.ai-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Price */
+.ai-price {
+  font-weight: 700;
+  color: #6f4e37;
+}
+
+/* ADD button */
+.ai-add {
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #6f4e37;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-add:hover {
+  background: #4b2e2b;
+}
+
+.menu-item-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+
+  
+}
+
+.addon-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addon-box {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 350px;
+}
+
+
+
+/* =========================================
+   ADDON MODAL (matches your cafe theme)
+   ========================================= */
+
+/* overlay */
+.addon-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+/* hide */
+.hidden {
+  display: none !important;
+}
+
+
+/* popup card */
+.addon-box {
+  width: 92%;
+  max-width: 380px;
+  max-height: 75vh;
+  overflow-y: auto;
+
+  background: #ffffff;
+  border-radius: 20px;
+
+  padding: 22px;
+
+  box-shadow: 0 15px 45px rgba(0,0,0,0.25);
+
+  animation: addonFade 0.25s ease;
+}
+
+
+/* animation */
+@keyframes addonFade {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* title */
+.addon-box h3 {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;
+
+  color: #5a4034; /* brown cafe tone */
+}
+
+
+/* addon rows */
+#addon-list label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  margin-bottom: 10px;
+
+  background: #f7f5f3;
+  border-radius: 10px;
+
+  font-size: 14px;
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+#addon-list label:hover {
+  background: #ebe6e2;
+}
+
+
+/* checkbox look */
+#addon-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #6b4f4f;
+  cursor: pointer;
+}
+
+
+/* buttons */
+.addon-box button {
+  width: 100%;
+  padding: 11px;
+  margin-top: 10px;
+
+  border-radius: 10px;
+  border: none;
+
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+
+/* add to cart */
+.addon-box button:first-of-type {
+  background: #6b4f4f;
+  color: #fff;
+}
+
+.addon-box button:first-of-type:hover {
+  background: #4e3838;
+}
+
+
+/* cancel */
+.addon-box button:last-of-type {
+  background: #e5e5e5;
+}
+
+.addon-box button:last-of-type:hover {
+  background: #d5d5d5;
+}

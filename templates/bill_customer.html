@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bill-wrapper">
+
+    <div class="bill-card">
+
+        <!-- HEADER -->
+        <div class="bill-header">
+            <h2>🧾 SmartBite Café - Bill</h2>
+            <p>Table No: <strong>{{ table_no }}</strong></p>
+        </div>
+
+        {% if orders|length == 0 %}
+
+        <!-- EMPTY STATE -->
+        <div class="empty-bill">
+            <h3>No Bill Generated Yet</h3>
+            <p>Order something from menu to generate bill.</p>
+            <a href="/menu?table={{ table_no }}" class="start-btn">
+                Start Ordering
+            </a>
+        </div>
+
+        {% elif not bill_generated %}
+
+        <!-- GENERATE BILL SECTION -->
+        <div class="generate-section">
+            <h3>Total Amount</h3>
+            <h2>₹{{ grand_total }}</h2>
+
+            <form action="{{ url_for('generate_bill', table_no=table_no) }}" method="POST">
+                <button type="submit" class="generate-btn">
+                    Generate Bill
+                </button>
+            </form>
+        </div>
+
+        {% else %}
+
+        <!-- BILL TABLE -->
+        <table class="bill-table">
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+
+            {% for order in orders %}
+            <tr>
+                <td>{{ order['item_name'] }}</td>
+                <td>{{ order['quantity'] }}</td>
+                <td>₹{{ order['price'] }}</td>
+                <td>₹{{ order['quantity'] * order['price'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- SUMMARY -->
+        <div class="bill-summary">
+            <p>Subtotal: ₹{{ subtotal }}</p>
+            <p>GST (18%): ₹{{ gst }}</p>
+            <p>Service Charge (5%): ₹{{ service_charge }}</p>
+            <h4>Grand Total: ₹{{ grand_total }}</h4>
+
+            <!-- Split Option -->
+            <div class="split-box">
+                <label>Split Bill:</label>
+                <input type="number" id="splitCount" min="1" placeholder="People">
+                <button onclick="splitBill()">Calculate</button>
+                <span id="splitResult"></span>
+            </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <button class="pay-btn" onclick="openPaymentModal()">
+            💳 Pay Now
+        </button>
+
+        <a href="/download_bill_pdf/{{ table_no }}" class="pdf-btn">
+            Download PDF
+        </a>
+
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="paymentModal" class="payment-modal">
+    <div class="payment-box">
+        <h3>Select Payment Method</h3>
+
+        <label>
+            <input type="radio" name="paymode" value="UPI"> UPI
+        </label>
+
+        <label>
+            <input type="radio" name="paymode" value="Card"> Card
+        </label>
+
+        <label>
+            <input type="radio" name="paymode" value="Cash"> Cash
+        </label>
+
+        <button class="confirm-btn" onclick="confirmPayment()">
+            Confirm Payment
+        </button>
+    </div>
+</div>
+
+<script>
+
+function openPaymentModal(){
+    document.getElementById("paymentModal").style.display = "flex";
+}
+
+function splitBill(){
+    let people = document.getElementById("splitCount").value;
+    let total = Number("{{ grand_total }}");
+
+    if(people > 0){
+        let perPerson = (total / people).toFixed(2);
+        document.getElementById("splitResult").innerHTML =
+            "Each Pays: ₹" + perPerson;
+    }
+}
+
+function confirmPayment(){
+
+    let mode = document.querySelector('input[name="paymode"]:checked');
+
+    if(!mode){
+        alert("Please select payment method");
+        return;
+    }
+
+    fetch("/api/pay/{{ table_no }}", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            mode: mode.value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        alert("Payment Successful!\nTransaction ID: " + data.transaction_id);
+
+        document.getElementById("paymentModal").style.display = "none";
+        location.reload();
+    })
+    .catch(error => console.log(error));
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Bite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if session.get("role") == "admin" %}
+<div class="navbar">
+    <div><strong>Admin Panel</strong></div>
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('kitchen_orders') }}">Kitchen</a>
+        <a href="{{ url_for('admin_export_csv') }}">Export</a>
+        <a href="{{ url_for('admin_login') }}">Logout</a>
+    </div>
+</div>
+
+{% elif session.get("role") == "customer" %}
+<div class="navbar">
+    <div>
+        <strong>Smart Bite</strong> | Table {{ session.get("table_no") }}
+    </div>
+    <div>
+        <a href="{{ url_for('menu') }}">Menu</a>
+        <a href="{{ url_for('cart') }}">Cart</a>
+
+        {% if session.get('table_no') %}
+    <a href="{{ url_for('customer_orders', table_no=session.get('table_no')) }}">
+        My Orders
+    </a>
+{% endif %}
+        {% if session.get('table_no') %}
+            <a href="{{ url_for('bill_customer', table_no=session.get('table_no')) }}">Bill</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

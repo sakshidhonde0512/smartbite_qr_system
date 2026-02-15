@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartBite Cafe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+
+    background: 
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url("/static/images/cafeeee.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+        .home-container {
+            background: rgba(255,255,255,0.1);
+            padding: 50px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .order-btn {
+            background: #fbbf24;
+            color: #000;
+        }
+
+        .order-btn:hover {
+            background: #f59e0b;
+        }
+
+        .admin-btn {
+            background: white;
+            color: #6f4e37;
+        }
+
+        .admin-btn:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="home-container">
+        <h1>☕ SmartBite Cafe</h1>
+        <p>Experience Smart Dining & Seamless Ordering</p>
+
+        <a href="/menu" class="btn order-btn">Order Now</a>
+        <a href="/admin/login" class="btn admin-btn">Admin Login</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+
+    background: 
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+        url("/static/images/cafeeee.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+        .login-container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #010100;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 20px;
+            font-weight: 400;
+            color: #03020a;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #483120;
+            box-shadow: 0 0 5px rgba(111, 78, 55, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #6f4e37;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #5a3c2a;
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .error-message {
+    background: rgba(255, 0, 0, 0.15);
+    color: red;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h2>Admin Panel Login</h2>
+        {% if error %}
+    <div class="error-message">{{ error }}</div>
+{% endif %}
+
+        <form method="POST" onsubmit="return validateLogin()">
+    <div class="input-group">
+        <label>Username</label>
+        <input type="text" name="username" id="username">
+        <small class="error" id="userError"></small>
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input type="password" name="password" id="password">
+        <small class="error" id="passError"></small>
+    </div>
+
+    <button type="submit">Login</button>
+</form>
+        <div class="footer-text">
+            © 2026 Cafe Management System
+        </div>
+    </div>
+<script>
+function validateLogin() {
+
+    let username = document.getElementById("username").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    let userError = document.getElementById("userError");
+    let passError = document.getElementById("passError");
+
+    userError.innerText = "";
+    passError.innerText = "";
+
+    let isValid = true;
+
+    // Username validation
+    if (username === "") {
+        userError.innerText = "Username is required";
+        isValid = false;
+    } 
+    else if (username.length < 4) {
+        userError.innerText = "Username must be at least 4 characters";
+        isValid = false;
+    }
+
+    // Password validation
+    if (password === "") {
+        passError.innerText = "Password is required";
+        isValid = false;
+    } 
+    else if (password.length < 6) {
+        passError.innerText = "Password must be at least 6 characters";
+        isValid = false;
+    }
+
+    return isValid;
+}
+</script>
+</body>
+</html>

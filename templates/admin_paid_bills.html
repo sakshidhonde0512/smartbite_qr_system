@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Paid Bills</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .table-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e6f2ff;
+            transition: 0.2s;
+        }
+
+        .total {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: white;
+        }
+
+        .upi { background-color: #3498db; }
+        .card { background-color: #9b59b6; }
+        .cash { background-color: #e67e22; }
+
+    </style>
+</head>
+
+<body>
+
+<h2>Paid Bills History</h2>
+
+<div class="table-container">
+    <table>
+        <tr>
+            <th>Bill ID</th>
+            <th>Table</th>
+            <th>Subtotal</th>
+            <th>GST (18%)</th>
+            <th>Service (5%)</th>
+            <th>Total</th>
+            <th>Payment Mode</th>
+            <th>Transaction ID</th>
+            <th>Paid At</th>
+        </tr>
+
+        {% for bill in bills %}
+        <tr>
+            <td>{{ bill["id"] }}</td>
+            <td>{{ bill["table_no"] }}</td>
+            <td>₹{{ bill["subtotal"] }}</td>
+            <td>₹{{ bill["gst"] }}</td>
+            <td>₹{{ bill["service_charge"] }}</td>
+            <td class="total">₹{{ bill["grand_total"] }}</td>
+
+            <td>
+                {% if bill["payment_mode"] == "UPI" %}
+                    <span class="badge upi">UPI</span>
+                {% elif bill["payment_mode"] == "Card" %}
+                    <span class="badge card">Card</span>
+                {% else %}
+                    <span class="badge cash">Cash</span>
+                {% endif %}
+            </td>
+
+            <td>{{ bill["transaction_id"] }}</td>
+            <td>{{ bill["paid_at"] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+</body>
+</html>
