@@ -79,7 +79,18 @@
         <h1>☕ SmartBite Cafe</h1>
         <p>Experience Smart Dining & Seamless Ordering</p>
 
-        <center><a href="/menu" class="btn order-btn">Order Now</a></center>
+        <center>
+    <button class="btn order-btn" onclick="showTableInput()">Order Now</button>
+</center>
+
+<script>
+function showTableInput() {
+    let tableNo = prompt("Enter Table Number");
+    if (tableNo && tableNo.trim() !== "") {
+        window.location.href = "/?table=" + tableNo;
+    }
+}
+</script>
         <!-- <a href="/admin/login" class="btn admin-btn">Admin Login</a> -->
     </div>
 
