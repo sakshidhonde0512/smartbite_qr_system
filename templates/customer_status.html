@@ -31,6 +31,7 @@ function loadOrders() {
         .then(res => res.json())
         .then(data => {
             let html = "";
+            let subtotal = 0;
 
             if (data.length === 0) {
                 html = `
@@ -42,27 +43,84 @@ function loadOrders() {
             }
 
             data.forEach(order => {
-                const progress = getProgress(order.status);
+
+    // 🚫 Skip cancelled orders completely
+    if (order.status.toLowerCase() === "cancelled") {
+        return;
+    }
+
+    const progress = getProgress(order.status);
+
+    subtotal += order.quantity * order.price;
+
+    let actionButtons = "";
+
+    // ✅ Show buttons only if status is Ordered
+    if (order.status.toLowerCase() === "ordered") {
+        actionButtons = `
+    <div class="order-actions">
+        <div class="qty-controls">
+            <button onclick="changeQty(${order.id}, 1)">+</button>
+            <button onclick="changeQty(${order.id}, -1)">−</button>
+        </div>
+        <button class="cancel-btn" onclick="cancelOrder(${order.id})">Cancel</button>
+    </div>
+`;
+    }
+
+    html += `
+        <div class="order-card">
+            <h3>${order.item_name}</h3>
+            <div class="order-info">
+                Quantity: ${order.quantity}<br>
+                <span class="price">₹${order.price}</span>
+            </div>
+            <span class="status ${order.status.toLowerCase()}">
+                ${order.status}
+            </span>
+            <div class="progress">
+                <div class="progress-bar" style="width:${progress}%"></div>
+            </div>
+            ${actionButtons}
+        </div>
+    `;
+});
+            if (data.length > 0) {
+                const gst = (subtotal * 0.05).toFixed(2);
+                const grandTotal = (subtotal + parseFloat(gst)).toFixed(2);
 
                 html += `
-                    <div class="order-card">
-                        <h3>${order.item_name}</h3>
+                    <div class="order-card total-card">
+                        <h3>Bill Summary</h3>
                         <div class="order-info">
-                            Quantity: ${order.quantity}<br>
-                            <span class="price">₹${order.price}</span>
-                        </div>
-                        <span class="status ${order.status.toLowerCase()}">
-                            ${order.status}
-                        </span>
-                        <div class="progress">
-                            <div class="progress-bar" style="width:${progress}%"></div>
+                            Subtotal: ₹${subtotal.toFixed(2)}<br>
+                            GST (5%): ₹${gst}<br>
+                            <strong>Grand Total: ₹${grandTotal}</strong>
                         </div>
                     </div>
                 `;
-            });
+            }
 
             document.getElementById("orders").innerHTML = html;
         });
+}
+
+function cancelOrder(orderId) {
+    fetch(`/cancel-order/${orderId}`, {
+        method: "POST"
+    }).then(() => loadOrders());
+}
+
+function changeQty(orderId, change) {
+    fetch(`/update-order/${orderId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            quantity: change
+        })
+    }).then(() => loadOrders());
 }
 
 loadOrders();

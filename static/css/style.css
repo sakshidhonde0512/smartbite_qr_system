@@ -909,6 +909,10 @@ body {
             align-items: center;
             padding: 15px 25px;
             background: #994f4f;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .navbar a {
@@ -1638,4 +1642,89 @@ text-decoration:none;
 
 .allergy-bar input {
   accent-color: #10b981;
+}
+
+/* Action container */
+.order-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Quantity button group */
+.qty-controls {
+    display: flex;
+    gap: 8px;
+}
+
+/* + and - buttons */
+.qty-controls button {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1c0e10;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.qty-controls button:hover {
+    background-color: #7f0f0f;
+}
+
+/* Cancel button */
+.cancel-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e74c3c;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+}
+
+.pay-section{
+    display:none;
+    margin-top:15px;
+}
+
+.payment-modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+}
+
+.payment-box{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    width:320px;
+}
+
+.spinner{
+  border:6px solid #f3f3f3;
+  border-top:6px solid #28a745;
+  border-radius:50%;
+  width:40px;
+  height:40px;
+  margin:auto;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  100%{ transform: rotate(360deg); }
 }

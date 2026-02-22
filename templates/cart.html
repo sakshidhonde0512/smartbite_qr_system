@@ -84,13 +84,12 @@ function renderCart() {
     cartItemsDiv.appendChild(div);
   });
 
-  const gst = Math.round(subtotal * 0.05);
-  const total = subtotal + gst;
+  const gst = (subtotal * 0.05).toFixed(2);
+const total = (subtotal + parseFloat(gst)).toFixed(2);
 
-  subtotalSpan.innerText = `₹${subtotal}`;
-  gstSpan.innerText = `₹${gst}`;
-  totalPriceSpan.innerText = `₹${total}`;
-
+  subtotalSpan.innerText = `₹${subtotal.toFixed(2)}`;
+gstSpan.innerText = `₹${gst}`;
+totalPriceSpan.innerText = `₹${total}`;
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 

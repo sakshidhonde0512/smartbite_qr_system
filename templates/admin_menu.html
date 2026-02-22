@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+body {
+    background: #faf3f3;
+    font-family: 'Poppins', sans-serif;
+}
+
+h2 {
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.dashboard-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.add-card {
+    width: 30%;
+}
+
+.table-card {
+    width: 70%;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+input, select {
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: #de828a;
+    outline: none;
+}
+
+button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background: #fd0d45;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #084298;
+}
+
+.btn-dark {
+    background: #343a40;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #a71d2a;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #e17c7c;
+    color: white;
+    padding: 14px;
+    text-align: left;
+}
+
+td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+.status-available {
+    color: green;
+    font-weight: 600;
+}
+
+.status-hidden {
+    color: red;
+    font-weight: 600;
+}
+
+img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media(max-width: 900px) {
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+
+    .add-card, .table-card {
+        width: 100%;
+    }
+}
+</style>
+
+<h2>📋 Manage Menu</h2>
+
+<div class="dashboard-wrapper">
+
+    <!-- Add Product Card -->
+    <div class="card add-card">
+        <h3>Add Product</h3>
+
+        <form action="/admin/add_item" method="POST" enctype="multipart/form-data">
+
+            <div class="form-row">
+                <input type="text" name="name" placeholder="Product Name" required>
+                <input type="number" step="0.01" name="price" placeholder="Price" required>
+            </div>
+
+            <div class="form-row">
+                <select name="sub_category_id" required>
+                    <option value="">Select Subcategory</option>
+                    {% for sub in sub_categories %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <select name="is_veg" required>
+                    <option value="">Select Type</option>
+                    <option value="1">Veg</option>
+                    <option value="0">Non-Veg</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <input type="file" name="image" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Add Product</button>
+
+        </form>
+    </div>
+
+    <!-- Product Table Card -->
+    <div class="card table-card">
+        <h3>All Products</h3>
+
+        <table>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Sub Category</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+
+            {% for item in items %}
+            <tr>
+                <td>
+                    {% if item.image %}
+                        <img src="{{ url_for('static', filename='images/menu/' + item.image) }}">
+                    {% else %}
+                        No Image
+                    {% endif %}
+                </td>
+
+                <td>{{ item.name }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>{{ item.sub_category }}</td>
+
+                <td>
+                    {% if item.is_veg|int == 1 %}
+                        <span style="color:green;font-weight:bold;">Veg</span>
+                    {% else %}
+                        <span style="color:red;font-weight:bold;">Non-Veg</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if item.available == 1 %}
+                        <span class="status-available">Available</span>
+                    {% else %}
+                        <span class="status-hidden">Out of Stock</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="/admin/toggle_item/{{ item.id }}">
+                        <button class="btn-dark">
+                            {% if item.available == 1 %}
+                                Disable
+                            {% else %}
+                                Enable
+                            {% endif %}
+                        </button>
+                    </a>
+
+                    <a href="/admin/delete_item/{{ item.id }}">
+                        <button class="btn-danger">Delete</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -65,16 +65,10 @@
 </div>
 
 <script>
-/* ================= TABLE NO ================= */
+
 const TABLE_NO = "{{ table_no }}";
 
-// if (!TABLE_NO) {
-//   alert("Table number missing. Please scan QR again.");
-// } else {
-//   localStorage.setItem("table_no", TABLE_NO);
-// }
 
-/* ================= CART ================= */
 let cart = [];
 let currentMood = null;
 
@@ -123,11 +117,11 @@ function openAddonModal(item, callback) {
   selectedItemForAddon = item;
   afterAddonCallback = callback;
 
-  // ✅ USE ADDONS FROM MENU API
+  
   const addons = item.addons;
 
   if (!addons || addons.length === 0) {
-    callback(); // no addons → normal flow
+    callback(); 
     return;
   }
 
@@ -162,7 +156,7 @@ function confirmAddons() {
     name: selectedItemForAddon.name,
     price: selectedItemForAddon.price + addonPrice,
     qty: 1,
-    addons: addonNames   // ⭐⭐ VERY IMPORTANT ⭐⭐
+    addons: addonNames   
   };
 
   addToCart(itemWithAddons);
@@ -311,9 +305,7 @@ document.getElementById("menuSearch").addEventListener("input", function() {
   });
 });
 
-/* MOOD → RECOMMENDATION (NO HIDING MENU) */
 
-/* ================= AI RECOMMENDATION ================= */
 
 function selectMood(mood) {
   currentMood = mood;

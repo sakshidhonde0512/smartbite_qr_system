@@ -5,13 +5,19 @@ import json
 import random
 from datetime import datetime
 from ai_engine import recommend
+from flask import g
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect("database.db")
+    return g.db
 
 print("🔥 THIS IS THE RUNNING app.py FILE 🔥")
 
 app = Flask(__name__)
 app.secret_key = "your_super_secret_key"
 CORS(app)
-conn = sqlite3.connect("database.db", check_same_thread=False)
+conn = sqlite3.connect("database.db", check_same_thread=False,isolation_level=None)
 conn.row_factory = sqlite3.Row
 cursor = conn.cursor()
 
@@ -182,7 +188,7 @@ def admin_login():
         elif len(password) < 6:
             error = "Password must be at least 6 characters"
 
-        elif username == "admin" and password == "admin123":
+        elif username == "smart_admin" and password == "admin0512":
             session["role"] = "admin"
             return redirect(url_for("admin_dashboard"))
 
@@ -211,6 +217,7 @@ def api_menu():
         FROM categories c
         JOIN sub_categories sc ON sc.category_id = c.id
         LEFT JOIN menu_items m ON m.sub_category_id = sc.id
+        AND m.available = 1
         ORDER BY c.id, sc.id, m.id
     """).fetchall()
 
@@ -335,7 +342,9 @@ def update_status():
     return jsonify({"success": True})
 @app.route('/my-orders/<int:table_no>')
 def customer_orders(table_no):
+
     conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
     cur.execute("""
@@ -346,14 +355,24 @@ def customer_orders(table_no):
     """, (table_no,))
 
     orders = cur.fetchall()
+
+    # ✅ ADD THIS PART
+    subtotal = sum(o["quantity"] * o["price"] for o in orders)
+    gst = round(subtotal * 0.05, 2)
+    service_charge = round(subtotal * 0.05, 2)
+    grand_total = round(subtotal + gst + service_charge, 2)
+
     conn.close()
 
     return render_template(
         'customer_status.html',
         orders=orders,
-        table_no=table_no
+        table_no=table_no,
+        subtotal=subtotal,
+        gst=gst,
+        service_charge=service_charge,
+        grand_total=grand_total
     )
-
 @app.route('/api/customer_status')
 def api_customer_status():
     table_no = request.args.get('table')
@@ -475,7 +494,7 @@ def menu():
 
     filter_type = request.args.get("filter", "all")
 
-    query = "SELECT * FROM menu_items"
+    query = "SELECT * FROM menu_items WHERE available = 1"
 
     if filter_type == "veg":
         query += " WHERE is_veg = 1"
@@ -517,7 +536,12 @@ def my_orders():
 def kitchen_orders():
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
-    cur.execute("SELECT id, table_no, item_name, quantity, price, status FROM orders")
+    cur.execute("""
+    SELECT id, table_no, item_name, quantity, price, status
+    FROM orders
+    WHERE status NOT IN ('Cancelled', 'Served')
+    ORDER BY id ASC
+""")
     orders = cur.fetchall()
     conn.close()
     return render_template("orders.html", orders=orders)
@@ -735,11 +759,11 @@ def bill_customer(table_no):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT item_name, quantity, price
-        FROM orders
-        WHERE table_no = ?
-        AND status != 'Paid'
-    """, (table_no,))
+    SELECT item_name, quantity, price
+    FROM orders
+    WHERE table_no = ?
+    AND status NOT IN ('Cancelled')
+""", (table_no,))
 
     orders = cur.fetchall()
 
@@ -825,6 +849,7 @@ def download_bill_pdf(table_no):
         SELECT item_name, quantity, price
         FROM orders
         WHERE table_no = ?
+        AND status NOT IN ('Cancelled')
     """, (table_no,))
 
     orders = cur.fetchall()
@@ -1039,6 +1064,159 @@ def get_menu_by_mood():
         })
 
     return jsonify(result)
+
+@app.route("/cancel-order/<int:order_id>", methods=["POST"])
+def cancel_order(order_id):
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    # Only allow cancel if still Ordered
+    cur.execute("SELECT status FROM orders WHERE id = ?", (order_id,))
+    order = cur.fetchone()
+
+    if order and order[0].lower() == "ordered":
+        cur.execute("UPDATE orders SET status = 'Cancelled' WHERE id = ?", (order_id,))
+        conn.commit()
+
+    conn.close()
+
+    return jsonify({"success": True})
+
+@app.route("/update-order/<int:order_id>", methods=["POST"])
+def update_order(order_id):
+
+    data = request.json
+    change = data.get("quantity")
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    cur.execute("SELECT quantity, status FROM orders WHERE id = ?", (order_id,))
+    order = cur.fetchone()
+
+    if order and order[1].lower() == "ordered":
+        new_qty = order[0] + change
+
+        if new_qty > 0:
+            cur.execute("UPDATE orders SET quantity = ? WHERE id = ?", (new_qty, order_id))
+        else:
+            cur.execute("DELETE FROM orders WHERE id = ?", (order_id,))
+
+        conn.commit()
+
+    conn.close()
+    return jsonify({"success": True})
+
+@app.route("/admin/menu")
+def admin_menu():
+    conn = sqlite3.connect("database.db")
+    conn.row_factory = sqlite3.Row   # 🔥 IMPORTANT
+    cur = conn.cursor()
+
+    # Get all menu items with subcategory name
+    cur.execute("""
+        SELECT m.id,
+               m.name,
+               m.price,
+               m.image,
+               m.available,
+               m.is_veg AS is_veg,
+               sc.name AS sub_category
+        FROM menu_items m
+        LEFT JOIN sub_categories sc
+        ON m.sub_category_id = sc.id
+    """)
+    items = cur.fetchall()
+
+    # Get subcategories for dropdown
+    cur.execute("SELECT id, name FROM sub_categories")
+    sub_categories = cur.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "admin_menu.html",
+        items=items,
+        sub_categories=sub_categories
+    )
+@app.route("/admin/toggle_item/<int:item_id>")
+def toggle_item(item_id):
+
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+
+    # Get current status
+    cur.execute("SELECT available FROM menu_items WHERE id = ?", (item_id,))
+    current = cur.fetchone()
+
+    if current:
+        new_status = 0 if current[0] == 1 else 1
+        cur.execute("UPDATE menu_items SET available = ? WHERE id = ?", (new_status, item_id))
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/admin/menu")
+
+@app.route("/admin/add_item", methods=["POST"])
+def add_item():
+
+    name = request.form.get("name")
+    price = int(request.form.get("price"))
+    is_veg = int(request.form.get("is_veg"))
+    sub_category_id = request.form.get("sub_category_id")
+
+    if not sub_category_id:
+        return "Please select a subcategory"
+
+    import os
+    from werkzeug.utils import secure_filename
+    image_file = request.files.get("image")
+    # Default image first
+    image_name = "default.jpg"
+    if image_file and image_file.filename:
+        image_name = secure_filename(image_file.filename)
+        upload_folder = os.path.join(app.root_path, "static", "images", "menu")
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+    image_file.save(os.path.join(upload_folder, image_name))
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute("""
+    INSERT INTO menu_items
+    (sub_category_id, name, price, is_veg, image, available)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+    sub_category_id,
+    name,
+    price,
+    is_veg,
+    image_name,
+    1
+    ))
+    conn.commit()
+    conn.close()
+    return redirect("/admin/menu")
+    
+    
+
+@app.route("/admin/delete_item/<int:item_id>")
+def delete_item(item_id):
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    cur.execute("DELETE FROM menu_items WHERE id = ?", (item_id,))
+    conn.commit()
+    conn.close()
+    return redirect("/admin/menu")
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
     
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True , use_reloader=False)

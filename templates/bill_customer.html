@@ -60,7 +60,7 @@
         <!-- SUMMARY -->
         <div class="bill-summary">
             <p>Subtotal: ₹{{ subtotal }}</p>
-            <p>GST (18%): ₹{{ gst }}</p>
+            <p>GST (5%): ₹{{ gst }}</p>
             <p>Service Charge (5%): ₹{{ service_charge }}</p>
             <h4>Grand Total: ₹{{ grand_total }}</h4>
 
@@ -78,9 +78,15 @@
             💳 Pay Now
         </button>
 
-        <a href="/download_bill_pdf/{{ table_no }}" class="pdf-btn">
-            Download PDF
-        </a>
+        {% if payment_done %}
+<a href="/download_bill_pdf/{{ table_no }}" class="pdf-btn">
+    Download PDF
+</a>
+{% else %}
+<button class="pdf-btn disabled-btn" disabled>
+    🔒 Pay to Download PDF
+</button>
+{% endif %}
 
         {% endif %}
 
@@ -93,20 +99,44 @@
         <h3>Select Payment Method</h3>
 
         <label>
-            <input type="radio" name="paymode" value="UPI"> UPI
+            <input type="radio" name="paymode" value="UPI" onchange="showSection('upi')"> UPI
         </label>
 
         <label>
-            <input type="radio" name="paymode" value="Card"> Card
+            <input type="radio" name="paymode" value="Card" onchange="showSection('card')"> Card
         </label>
 
         <label>
-            <input type="radio" name="paymode" value="Cash"> Cash
+            <input type="radio" name="paymode" value="Cash" onchange="showSection('cash')"> Cash
         </label>
 
-        <button class="confirm-btn" onclick="confirmPayment()">
-            Confirm Payment
-        </button>
+        <!-- UPI SECTION -->
+        <div id="upiSection" class="pay-section">
+            <p>Scan QR to Pay</p>
+            <img src="/static/images/qrcode.jpg" width="180">
+            <p><b>UPI ID:</b> smartbite@upi</p>
+            <button onclick="startProcessing('UPI')">I Have Paid</button>
+        </div>
+
+        <!-- CARD SECTION -->
+        <div id="cardSection" class="pay-section">
+            <input type="text" placeholder="Card Number">
+            <input type="text" placeholder="MM/YY">
+            <input type="text" placeholder="CVV">
+            <button onclick="startProcessing('Card')">Pay Now</button>
+        </div>
+
+        <!-- CASH SECTION -->
+        <div id="cashSection" class="pay-section">
+            <p>Please pay at counter.</p>
+            <button onclick="startProcessing('Cash')">Confirm Cash Payment</button>
+        </div>
+
+        <!-- LOADER -->
+        <div id="paymentLoader" style="display:none;">
+            <p>Processing Payment...</p>
+            <div class="spinner"></div>
+        </div>
     </div>
 </div>
 
@@ -114,6 +144,22 @@
 
 function openPaymentModal(){
     document.getElementById("paymentModal").style.display = "flex";
+}
+
+function showSection(type){
+    document.getElementById("upiSection").style.display = "none";
+    document.getElementById("cardSection").style.display = "none";
+    document.getElementById("cashSection").style.display = "none";
+
+    if(type === "upi"){
+        document.getElementById("upiSection").style.display = "block";
+    }
+    if(type === "card"){
+        document.getElementById("cardSection").style.display = "block";
+    }
+    if(type === "cash"){
+        document.getElementById("cashSection").style.display = "block";
+    }
 }
 
 function splitBill(){
@@ -127,33 +173,64 @@ function splitBill(){
     }
 }
 
-function confirmPayment(){
+function startProcessing(mode){
 
-    let mode = document.querySelector('input[name="paymode"]:checked');
+    document.getElementById("upiSection").style.display = "none";
+    document.getElementById("cardSection").style.display = "none";
+    document.getElementById("cashSection").style.display = "none";
+    document.getElementById("paymentLoader").style.display = "block";
 
-    if(!mode){
-        alert("Please select payment method");
-        return;
-    }
+    setTimeout(function(){
 
-    fetch("/api/pay/{{ table_no }}", {
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
-            mode: mode.value
+        // 10% chance failure simulation
+        let success = Math.random() > 0.1;
+
+        if(!success){
+            Swal.fire({
+                icon: "error",
+                title: "Payment Failed",
+                text: "Transaction declined. Please try again."
+            });
+            document.getElementById("paymentLoader").style.display = "none";
+            return;
+        }
+
+        fetch("/api/pay/{{ table_no }}", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                mode: mode
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
+        .then(response => response.json())
+        .then(data => {
 
-        alert("Payment Successful!\nTransaction ID: " + data.transaction_id);
+    Swal.fire({
+        icon: 'success',
+        title: 'Payment Successful!',
+        text: 'Transaction ID: ' + data.transaction_id,
+        confirmButtonText: 'Download Bill'
+    }).then(() => {
 
-        document.getElementById("paymentModal").style.display = "none";
-        location.reload();
-    })
-    .catch(error => console.log(error));
+        // Create hidden link to download PDF
+        const link = document.createElement("a");
+        link.href = "/download_bill_pdf/{{ table_no }}";
+        link.download = "Bill_Table_{{ table_no }}.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // After download starts, reload bill page
+        setTimeout(() => {
+            window.location.href = "/bill/{{ table_no }}";
+        }, 1000);
+
+    });
+
+})
+    }, 3000); // 3 second realistic delay
 }
 
 </script>
