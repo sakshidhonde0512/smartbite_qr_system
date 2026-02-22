@@ -165,7 +165,7 @@ def index():
         session.clear()
         session["role"] = "customer"
         session["table_no"] = table
-        # return redirect(url_for("menu"))  # Use your existing menu route name
+        return redirect(url_for("menu",table_no=table))  # Use your existing menu route name
 
     return render_template("home.html")
 
