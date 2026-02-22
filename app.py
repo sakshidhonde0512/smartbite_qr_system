@@ -1217,6 +1217,10 @@ def close_db(exception):
     if db is not None:
         db.close()
 
+@app.route("/check_table")
+def check_table():
+    return {"table": session.get("table_no")}
+
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True , use_reloader=False)
