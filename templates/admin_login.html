@@ -6,25 +6,25 @@
 
     <style>
         body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
 
-    background: 
-        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
-        url("/static/images/cafeeee.jpg");
+            background: 
+                linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+                url("/static/images/cafeeee.jpg");
 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
-    font-family: 'Poppins', sans-serif;
-}
+            font-family: 'Poppins', sans-serif;
+        }
 
         .login-container {
             background: rgba(176, 31, 31, 0.1);
@@ -47,10 +47,9 @@
         }
 
         .input-group label {
-            font-size: 20px;
-            font-weight: 400;
+            font-size: 18px;
+            font-weight: 500;
             color: #03020a;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
         }
 
         .input-group input {
@@ -64,8 +63,29 @@
         }
 
         .input-group input:focus {
-            border-color: #483120;
+            border-color: #6f4e37;
             box-shadow: 0 0 5px rgba(111, 78, 55, 0.3);
+        }
+
+        /* 🔴 Error styling */
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .input-error {
+            border: 1px solid red !important;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.15);
+            color: red;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
 
         button {
@@ -89,81 +109,88 @@
             font-size: 12px;
             color: #999;
         }
-
-        .error-message {
-    background: rgba(255, 0, 0, 0.15);
-    color: rgb(177, 127, 127);
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
     </style>
 </head>
 
 <body>
 
-    <div class="login-container">
-        <h2>Admin Panel Login</h2>
-        {% if error %}
-    <div class="error-message">{{ error }}</div>
-{% endif %}
+<div class="login-container">
+    <h2>Admin Panel Login</h2>
 
-        <form method="POST" onsubmit="return validateLogin()">
-    <div class="input-group">
-        <label>Username</label>
-        <input type="text" name="username" id="username">
-        <small class="error" id="userError"></small>
-    </div>
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
 
-    <div class="input-group">
-        <label>Password</label>
-        <input type="password" name="password" id="password">
-        <small class="error" id="passError"></small>
-    </div>
+    <form method="POST" onsubmit="return validateLogin()">
 
-    <button type="submit">Login</button>
-</form>
-        <div class="footer-text">
-            © 2026 Cafe Management System
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" name="username" id="username">
+            <small class="error" id="userError"></small>
         </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" id="password">
+            <small class="error" id="passError"></small>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="footer-text">
+        © 2026 Cafe Management System
     </div>
+</div>
+
 <script>
 function validateLogin() {
 
-    let username = document.getElementById("username").value.trim();
-    let password = document.getElementById("password").value.trim();
+    let username = document.getElementById("username");
+    let password = document.getElementById("password");
 
     let userError = document.getElementById("userError");
     let passError = document.getElementById("passError");
 
+    // Reset
     userError.innerText = "";
     passError.innerText = "";
+    username.classList.remove("input-error");
+    password.classList.remove("input-error");
 
     let isValid = true;
 
     // Username validation
-    if (username === "") {
+    let usernameValue = username.value.trim();
+
+    if (usernameValue === "") {
         userError.innerText = "Username is required";
+        username.classList.add("input-error");
         isValid = false;
     } 
-    else if (username.length < 4) {
-        userError.innerText = "Username must be at least 4 characters";
+    else if (!/^[a-zA-Z0-9_]{4,16}$/.test(usernameValue)) {
+        userError.innerText = "4–16 chars, letters/numbers/_ only";
+        username.classList.add("input-error");
         isValid = false;
     }
 
     // Password validation
-    if (password === "") {
+    let passwordValue = password.value.trim();
+
+    if (passwordValue === "") {
         passError.innerText = "Password is required";
+        password.classList.add("input-error");
         isValid = false;
     } 
-    else if (password.length < 6) {
-        passError.innerText = "Password must be at least 6 characters";
+    else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,}$/.test(passwordValue)) {
+        passError.innerText = "Min 6 chars with uppercase, lowercase & number";
+        password.classList.add("input-error");
         isValid = false;
     }
 
     return isValid;
 }
 </script>
+
 </body>
 </html>

@@ -188,7 +188,7 @@ def admin_login():
         elif len(password) < 6:
             error = "Password must be at least 6 characters"
 
-        elif username == "smart_admin" and password == "admin0512":
+        elif username == "smart_admin" and password == "Admin0512":
             session["role"] = "admin"
             return redirect(url_for("admin_dashboard"))
 
